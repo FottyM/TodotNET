@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TodoApi.Models;
 
 namespace TodoApi.Controllers
@@ -18,13 +16,12 @@ namespace TodoApi.Controllers
 
         private readonly TodoContext _context;
         private readonly WebClient _httpClient = new WebClient();
-        private string box = "";
-
+       
         public TodoController(TodoContext context)
         {
             _context = context;
             
-            if ( _context.TodoItems.Count() == 0 )
+            if ( !_context.TodoItems.Any() )
             {
                 _context.TodoItems.Add(new TodoItem { Name = "Buy Batman Costume" });
                 _context.SaveChanges();
@@ -34,9 +31,6 @@ namespace TodoApi.Controllers
         [HttpGet]
         public IEnumerable<TodoItem> GetAll()
         {
-         string task =  PUBG().Result;
-            Console.Write(task);
-            
             return _context.TodoItems.ToList();
         }
 
@@ -49,7 +43,10 @@ namespace TodoApi.Controllers
                 return NotFound();
             }
             
-            return new ObjectResult(item);
+            var task =  PUBG().Result;
+            dynamic dude = JsonConvert.DeserializeObject(task);
+            
+            return new ObjectResult(dude);
         }
 
         [HttpPost]
@@ -106,10 +103,8 @@ namespace TodoApi.Controllers
 
         private async Task<string> PUBG()
         {
-            var html = await _httpClient
-                .DownloadStringTaskAsync("https://jsonplaceholder.typicode.com/posts");
-            return html;
-
+            return await _httpClient.DownloadStringTaskAsync("https://jsonplaceholder.typicode.com/posts/1");
+            
         }
     }
 }
