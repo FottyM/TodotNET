@@ -1,6 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp;
 using TodoApi.Models;
 
 namespace TodoApi.Controllers
@@ -10,6 +17,8 @@ namespace TodoApi.Controllers
     {
 
         private readonly TodoContext _context;
+        private readonly WebClient _httpClient = new WebClient();
+        private string box = "";
 
         public TodoController(TodoContext context)
         {
@@ -25,6 +34,9 @@ namespace TodoApi.Controllers
         [HttpGet]
         public IEnumerable<TodoItem> GetAll()
         {
+         string task =  PUBG().Result;
+            Console.Write(task);
+            
             return _context.TodoItems.ToList();
         }
 
@@ -90,6 +102,14 @@ namespace TodoApi.Controllers
             _context.SaveChanges();
             
             return new NoContentResult();
+        }
+
+        private async Task<string> PUBG()
+        {
+            var html = await _httpClient
+                .DownloadStringTaskAsync("https://jsonplaceholder.typicode.com/posts");
+            return html;
+
         }
     }
 }
